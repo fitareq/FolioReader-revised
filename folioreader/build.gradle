@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 //apply from: '../config/quality/quality.gradle'
 //apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'kotlin-android'
+//apply plugin: 'maven-publish'
 //apply plugin: 'kotlin-android-extensions'
 
 /*ext {
@@ -29,14 +30,25 @@ apply plugin: 'kotlin-android'
 }*/
 
 android {
-    compileSdkVersion 30
-    defaultConfig{
+    compileSdkVersion 33
+    defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 33
     }
 
-
 }
+/*afterEvaluate {
+    publishing {
+        publications(
+                release() {
+                    from components.release
+                    groupId = 'com.github.fitareq'
+                    artifactId = 'folio-revised'
+                    version = "1.0.0"
+                }
+        )
+    }
+}*/
 
 /*android {
     //useLibrary 'org.apache.http.legacy'
