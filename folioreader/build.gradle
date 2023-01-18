@@ -55,6 +55,19 @@ android {
     }
 
 }
+
+afterEvaluate {
+    publishing {
+        publications{
+            release(MavenPublication){
+                from components.release
+                groupId = 'com.github.fitareq'
+                artifactId = 'folio-revised'
+                version = '1.0'
+            }
+        }
+    }
+}
 /*afterEvaluate {
     publishing {
         publications(
