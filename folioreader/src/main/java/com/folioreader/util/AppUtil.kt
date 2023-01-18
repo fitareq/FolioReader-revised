@@ -111,12 +111,12 @@ class AppUtil {
         fun getSavedConfig(context: Context?): Config? {
             val json = getSharedPreferencesString(context, Config.INTENT_CONFIG, null)
             if (json != null) {
-                try {
+                return try {
                     val jsonObject = JSONObject(json)
-                    return Config(jsonObject)
+                    Config(jsonObject)
                 } catch (e: JSONException) {
                     Log.e(LOG_TAG, "${e.message}")
-                    return null
+                    null
                 }
 
             }

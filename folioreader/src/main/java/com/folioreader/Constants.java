@@ -30,6 +30,9 @@ public class Constants {
     public static final int WRITE_EXTERNAL_STORAGE_REQUEST = 102;
     public static final String CHAPTER_ID = "id";
     public static final String HREF = "href";
+    public static final String KEY_IS_SCREENSHOT_ENABLED = "ENABLE_SCREENSHOT";
+
+    public static boolean isCopyEnabled = true;
 
     public static String[] getWriteExternalStoragePerms() {
         return new String[]{

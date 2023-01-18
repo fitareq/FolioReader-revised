@@ -9,6 +9,7 @@ import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import com.folioreader.Config
@@ -29,15 +30,20 @@ class MainActivity : AppCompatActivity(), OnHighlightListener, ReadLocatorListen
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val folioReader = FolioReader.get()
-            .setOnHighlightListener(this)
-            .setReadLocatorListener(this)
-            .setOnClosedListener(this)
+
         var config = getSavedConfig(applicationContext)
         if (config == null) config = Config()
         config.allowedDirection = Config.AllowedDirection.VERTICAL_AND_HORIZONTAL
-        folioReader.setConfig(config, true)
-            .openBook("file:///android_asset/adventures.epub")
+        config.setThemeColorInt(ContextCompat.getColor(this, R.color.purple_200))
+
+        FolioReader.get()
+            .setOnHighlightListener(this)
+            .setReadLocatorListener(this)
+            .setOnClosedListener(this)
+            .setConfig(config, true)
+            .setScreenShotEnabled(true)
+            .setCopyEnabled(false)
+            .openBook("file:///android_asset/bangla.epub")
 
         /*imageView = findViewById(R.id.pdf_view)
 

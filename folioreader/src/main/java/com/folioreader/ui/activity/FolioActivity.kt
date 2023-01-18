@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -73,6 +74,7 @@ import org.readium.r2.streamer.parser.EpubParser
 import org.readium.r2.streamer.parser.PubBox
 import org.readium.r2.streamer.server.Server
 import java.lang.ref.WeakReference
+import kotlin.math.ceil
 
 class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControllerCallback,
     View.OnSystemUiVisibilityChangeListener {
@@ -154,7 +156,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
     }
 
-    val statusBarHeight: Int
+    private val statusBarHeight: Int
         get() {
             var result = 0
             val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -254,7 +256,9 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             closeBroadcastReceiver,
             IntentFilter(FolioReader.ACTION_CLOSE_FOLIOREADER)
         )
-
+        val screenshotEnabled = intent.getBooleanExtra(KEY_IS_SCREENSHOT_ENABLED, false)
+        if (!screenshotEnabled)
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         // Fix for screen get turned off while reading
         // TODO -> Make this configurable
         // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -263,6 +267,8 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         initDistractionFreeMode(savedInstanceState)
 
         setContentView(R.layout.folio_activity)
+
+
         this.savedInstanceState = savedInstanceState
 
         if (savedInstanceState != null) {
@@ -308,6 +314,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
         val drawable = ContextCompat.getDrawable(this, R.drawable.ic_drawer)
         UiUtil.setColorIntToDrawable(config.themeColor, drawable!!)
+
         toolbar!!.navigationIcon = drawable
 
         if (config.isNightMode) {
@@ -316,22 +323,14 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             setDayMode()
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val color: Int
-            if (config.isNightMode) {
-                color = ContextCompat.getColor(this, R.color.black)
-            } else {
-                val attrs = intArrayOf(android.R.attr.navigationBarColor)
-                val typedArray = theme.obtainStyledAttributes(attrs)
-                color = typedArray.getColor(0, ContextCompat.getColor(this, R.color.white))
-            }
-            window.navigationBarColor = color
+        val color: Int = if (config.isNightMode) {
+            ContextCompat.getColor(this, R.color.black)
+        } else {
+            val attrs = intArrayOf(android.R.attr.navigationBarColor)
+            val typedArray = theme.obtainStyledAttributes(attrs)
+            typedArray.getColor(0, ContextCompat.getColor(this, R.color.white))
         }
-
-        if (Build.VERSION.SDK_INT < 16) {
-            // Fix for appBarLayout.fitSystemWindows() not being called on API < 16
-            appBarLayout!!.setTopMargin(statusBarHeight)
-        }
+        window.navigationBarColor = color
     }
 
     override fun setDayMode() {
@@ -375,40 +374,43 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         //Log.d(LOG_TAG, "-> onOptionsItemSelected -> " + item.getItemId());
 
-        val itemId = item.itemId
-
-        if (itemId == android.R.id.home) {
-            Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer")
-            startContentHighlightActivity()
-            return true
-
-        } else if (itemId == R.id.itemSearch) {
-            Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
-            if (searchUri == null)
+        when (item.itemId) {
+            android.R.id.home -> {
+                Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer")
+                startContentHighlightActivity()
                 return true
-            val intent = Intent(this, SearchActivity::class.java)
-            intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, spine?.size ?: 0)
-            intent.putExtra(SearchActivity.BUNDLE_SEARCH_URI, searchUri)
-            intent.putExtra(SearchAdapter.DATA_BUNDLE, searchAdapterDataBundle)
-            intent.putExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY, searchQuery)
-            startActivityForResult(intent, RequestCode.SEARCH.value)
-            return true
 
-        } else if (itemId == R.id.itemConfig) {
-            Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
-            showConfigBottomSheetDialogFragment()
-            return true
+            }
+            R.id.itemSearch -> {
+                Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
+                if (searchUri == null)
+                    return true
+                val intent = Intent(this, SearchActivity::class.java)
+                intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, spine?.size ?: 0)
+                intent.putExtra(SearchActivity.BUNDLE_SEARCH_URI, searchUri)
+                intent.putExtra(SearchAdapter.DATA_BUNDLE, searchAdapterDataBundle)
+                intent.putExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY, searchQuery)
+                startActivityForResult(intent, RequestCode.SEARCH.value)
+                return true
 
-        } else if (itemId == R.id.itemTts) {
-            Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
-            showMediaController()
-            return true
+            }
+            R.id.itemConfig -> {
+                Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
+                showConfigBottomSheetDialogFragment()
+                return true
+
+            }
+            R.id.itemTts -> {
+                Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
+                showMediaController()
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
 
-        return super.onOptionsItemSelected(item)
     }
 
-    fun startContentHighlightActivity() {
+    private fun startContentHighlightActivity() {
 
         val intent = Intent(this@FolioActivity, ContentHighlightActivity::class.java)
 
@@ -430,14 +432,14 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up)
     }
 
-    fun showConfigBottomSheetDialogFragment() {
+    private fun showConfigBottomSheetDialogFragment() {
         ConfigBottomSheetDialogFragment().show(
             supportFragmentManager,
             ConfigBottomSheetDialogFragment.LOG_TAG
         )
     }
 
-    fun showMediaController() {
+    private fun showMediaController() {
         mediaControllerFragment!!.show(supportFragmentManager)
     }
 
@@ -510,13 +512,12 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         title = publication.metadata.title
 
         if (mBookId == null) {
-            if (!publication.metadata.identifier.isEmpty()) {
-                mBookId = publication.metadata.identifier
-            } else {
-                if (!publication.metadata.title.isEmpty()) {
-                    mBookId = publication.metadata.title.hashCode().toString()
+            mBookId = publication.metadata.identifier.ifEmpty {
+
+                if (publication.metadata.title.isNotEmpty()) {
+                    publication.metadata.title.hashCode().toString()
                 } else {
-                    mBookId = bookFileName!!.hashCode().toString()
+                    bookFileName!!.hashCode().toString()
                 }
             }
         }
@@ -624,12 +625,12 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         if (!distractionFreeMode)
             bottomDistraction = appBarLayout!!.navigationBarHeight
 
-        when (unit) {
-            DisplayUnit.PX -> return bottomDistraction
+        return when (unit) {
+            DisplayUnit.PX -> bottomDistraction
 
             DisplayUnit.DP -> {
                 bottomDistraction /= density.toInt()
-                return bottomDistraction
+                bottomDistraction
             }
 
             else -> throw IllegalArgumentException("-> Illegal argument -> unit = $unit")
@@ -675,10 +676,10 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             }
 
             DisplayUnit.CSS_PX -> {
-                viewportRect.left = Math.ceil((viewportRect.left / density).toDouble()).toInt()
-                viewportRect.top = Math.ceil((viewportRect.top / density).toDouble()).toInt()
-                viewportRect.right = Math.ceil((viewportRect.right / density).toDouble()).toInt()
-                viewportRect.bottom = Math.ceil((viewportRect.bottom / density).toDouble()).toInt()
+                viewportRect.left = ceil((viewportRect.left / density).toDouble()).toInt()
+                viewportRect.top = ceil((viewportRect.top / density).toDouble()).toInt()
+                viewportRect.right = ceil((viewportRect.right / density).toDouble()).toInt()
+                viewportRect.bottom = ceil((viewportRect.bottom / density).toDouble()).toInt()
                 return viewportRect
             }
 
@@ -733,25 +734,16 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     private fun hideSystemUI() {
         Log.v(LOG_TAG, "-> hideSystemUI")
 
-        if (Build.VERSION.SDK_INT >= 16) {
-            val decorView = window.decorView
-            decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
-                    // Set the content to appear under the system bars so that the
-                    // content doesn't resize when the system bars hide and show.
-                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    // Hide the nav bar and status bar
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN)
-        } else {
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-            )
-            // Specified 1 just to mock anything other than View.SYSTEM_UI_FLAG_VISIBLE
-            onSystemUiVisibilityChange(1)
-        }
+        val decorView = window.decorView
+        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
+                // Set the content to appear under the system bars so that the
+                // content doesn't resize when the system bars hide and show.
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                // Hide the nav bar and status bar
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN)
     }
 
     override fun getEntryReadLocator(): ReadLocator? {
@@ -785,6 +777,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == RequestCode.SEARCH.value) {
             Log.v(LOG_TAG, "-> onActivityResult -> " + RequestCode.SEARCH)
@@ -988,21 +981,17 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         val overrideConfig = intent.getBooleanExtra(Config.EXTRA_OVERRIDE_CONFIG, false)
         val savedConfig = AppUtil.getSavedConfig(this)
 
-        if (savedInstanceState != null) {
-            config = savedConfig
+        config = if (savedInstanceState != null) {
+            savedConfig
 
         } else if (savedConfig == null) {
-            if (intentConfig == null) {
-                config = Config()
-            } else {
-                config = intentConfig
-            }
+            intentConfig ?: Config()
 
         } else {
             if (intentConfig != null && overrideConfig) {
-                config = intentConfig
+                intentConfig
             } else {
-                config = savedConfig
+                savedConfig
             }
         }
 

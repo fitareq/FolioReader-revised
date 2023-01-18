@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class FolioReader {
 
     @SuppressLint("StaticFieldLeak")
-    private static FolioReader singleton = null;
+    private static volatile FolioReader singleton = null;
 
     public static final String EXTRA_BOOK_ID = "com.folioreader.extra.BOOK_ID";
     public static final String EXTRA_READ_LOCATOR = "com.folioreader.extra.READ_LOCATOR";
@@ -51,6 +51,7 @@ public class FolioReader {
     private ReadLocatorListener readLocatorListener;
     private OnClosedListener onClosedListener;
     private ReadLocator readLocator;
+    private boolean isScreenShotEnabled = false;
 
     @Nullable
     public Retrofit retrofit;
@@ -163,6 +164,7 @@ public class FolioReader {
         intent.putExtra(Config.EXTRA_OVERRIDE_CONFIG, overrideConfig);
         intent.putExtra(EXTRA_PORT_NUMBER, portNumber);
         intent.putExtra(FolioActivity.EXTRA_READ_LOCATOR, (Parcelable) readLocator);
+        intent.putExtra(Constants.KEY_IS_SCREENSHOT_ENABLED, isScreenShotEnabled);
 
         if (rawId != 0) {
             intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_PATH, rawId);
@@ -294,5 +296,13 @@ public class FolioReader {
         localBroadcastManager.unregisterReceiver(highlightReceiver);
         localBroadcastManager.unregisterReceiver(readLocatorReceiver);
         localBroadcastManager.unregisterReceiver(closedReceiver);
+    }
+    public FolioReader setScreenShotEnabled(boolean isScreenShotEnabled){
+        this.isScreenShotEnabled = isScreenShotEnabled;
+        return singleton;
+    }
+    public FolioReader setCopyEnabled(boolean isCopyEnabled){
+        Constants.isCopyEnabled = isCopyEnabled;
+        return singleton;
     }
 }

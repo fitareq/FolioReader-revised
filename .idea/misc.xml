@@ -3,12 +3,24 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.12462006079027356" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.23020833333333332" />
+        <entry key="folioreader/src/main/res/drawable/ic_drawer.xml" value="0.1215" />
+        <entry key="folioreader/src/main/res/layout/action_item_horizontal.xml" value="0.1" />
+        <entry key="folioreader/src/main/res/layout/action_item_vertical.xml" value="0.23020833333333332" />
+        <entry key="folioreader/src/main/res/layout/activity_content_highlight.xml" value="0.23020833333333332" />
         <entry key="folioreader/src/main/res/layout/activity_search.xml" value="0.1" />
+        <entry key="folioreader/src/main/res/layout/dialog_edit_notes.xml" value="0.23020833333333332" />
+        <entry key="folioreader/src/main/res/layout/folio_activity.xml" value="0.23020833333333332" />
+        <entry key="folioreader/src/main/res/layout/folio_page_fragment.xml" value="0.23020833333333332" />
+        <entry key="folioreader/src/main/res/layout/fragment_contents.xml" value="0.23020833333333332" />
+        <entry key="folioreader/src/main/res/layout/fragment_highlight_list.xml" value="0.23020833333333332" />
         <entry key="folioreader/src/main/res/layout/progress_dialog.xml" value="0.1" />
         <entry key="folioreader/src/main/res/layout/text_selection.xml" value="0.1" />
         <entry key="folioreader/src/main/res/layout/view_audio_player.xml" value="0.1" />
         <entry key="folioreader/src/main/res/layout/view_config.xml" value="0.2064814814814815" />
+        <entry key="folioreader/src/main/res/layout/view_loading.xml" value="0.23020833333333332" />
+        <entry key="folioreader/src/main/res/layout/view_webview_pager.xml" value="0.23020833333333332" />
       </map>
     </option>
   </component>

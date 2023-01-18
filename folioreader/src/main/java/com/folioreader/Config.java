@@ -179,6 +179,11 @@ public class Config implements Parcelable {
         return themeColor;
     }
 
+
+    public void setThemeColor(@ColorInt int themeColor) {
+        this.themeColor = themeColor;
+    }
+
     public Config setThemeColorRes(@ColorRes int colorResId) {
         try {
             this.themeColor = ContextCompat.getColor(AppContext.get(), colorResId);
