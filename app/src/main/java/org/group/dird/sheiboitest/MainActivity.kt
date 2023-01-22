@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity(), OnHighlightListener, ReadLocatorListen
             .setConfig(config, true)
             .setScreenShotEnabled(false)
             .setCopyEnabled(false)
-            .openBook("file:///android_asset/bangla.epub")
+            .openBook("file:///android_asset/adventures.epub")
 
         /*imageView = findViewById(R.id.pdf_view)
 
