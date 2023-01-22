@@ -26,7 +26,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 class MainActivity : AppCompatActivity(), OnHighlightListener, ReadLocatorListener, OnClosedListener{
     private lateinit var imageView: ImageView
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -34,14 +33,14 @@ class MainActivity : AppCompatActivity(), OnHighlightListener, ReadLocatorListen
         var config = getSavedConfig(applicationContext)
         if (config == null) config = Config()
         config.allowedDirection = Config.AllowedDirection.VERTICAL_AND_HORIZONTAL
-        config.setThemeColorInt(ContextCompat.getColor(this, R.color.purple_200))
+        config.setThemeColorInt(ContextCompat.getColor(this, R.color.black))
 
         FolioReader.get()
             .setOnHighlightListener(this)
             .setReadLocatorListener(this)
             .setOnClosedListener(this)
             .setConfig(config, true)
-            .setScreenShotEnabled(true)
+            .setScreenShotEnabled(false)
             .setCopyEnabled(false)
             .openBook("file:///android_asset/bangla.epub")
 
