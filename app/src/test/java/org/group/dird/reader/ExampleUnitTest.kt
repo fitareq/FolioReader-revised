@@ -1,4 +1,4 @@
-package org.group.dird.sheiboitest
+package org.group.dird.reader
 
 import org.junit.Test
 

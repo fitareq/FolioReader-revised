@@ -1,4 +1,4 @@
-package org.group.dird.sheiboitest
+package org.group.dird.reader
 
 import android.content.ContentUris
 import android.database.Cursor
@@ -20,7 +20,6 @@ import com.folioreader.model.locators.ReadLocator
 import com.folioreader.util.AppUtil.Companion.getSavedConfig
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
-import kotlinx.coroutines.DelicateCoroutinesApi
 
 
 class MainActivity : AppCompatActivity(), OnHighlightListener, ReadLocatorListener, OnClosedListener{
